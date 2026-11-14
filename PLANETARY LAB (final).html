@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>PLANETARY LAB</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{--bg:#14161a;--pn:#1c1f25;--bd:#2c313a;--tx:#e8eaed;--mu:#8e95a0;--bl:#5aa2ff;--or:#ff9a3c;--ok:#5fcf8f;--bad:#ff7070;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f2f3f5;--pn:#fff;--bd:#d6dae1;--tx:#1b1f26;--mu:#5b6370;--bl:#0b63ce;--or:#b85500;--ok:#13793c;--bad:#c42b2b;color-scheme:light}}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
+header{padding:16px 18px 6px}
+h1{margin:0;font-size:22px;font-weight:650;letter-spacing:.02em}
+header p{margin:2px 0 0;color:var(--mu);max-width:70ch}
+h2{margin:0 0 8px;font-size:15px;font-weight:600}
+h3{margin:14px 0 6px;font-size:13px;font-weight:600;color:var(--bl)}
+.g{display:grid;grid-template-columns:310px minmax(0,1fr);gap:12px;padding:12px 18px 24px}
+@media(max-width:860px){.g{grid-template-columns:1fr}}
+.p{background:var(--pn);border:1px solid var(--bd);border-radius:6px;padding:14px;margin-bottom:12px}
+main{min-width:0}
+aside .p{margin:0}
+label{display:block;margin:8px 0 0;color:var(--mu);font-size:12.5px}
+label b{color:var(--tx);font-weight:600}
+input[type=range]{width:100%;accent-color:var(--bl);margin:2px 0 0}
+select,input[type=text]{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:4px;padding:7px;font:inherit}
+:focus-visible{outline:2px solid var(--or);outline-offset:1px}
+.sc{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:520px}
+th,td{padding:5px 8px;border-bottom:1px solid var(--bd);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--mu);font-weight:500;font-size:12.5px}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.n{color:var(--mu)}
+.c{display:inline-block;font-size:11px;padding:0 6px;border:1px solid var(--bd);border-radius:9px;color:var(--mu)}
+.c.PUB{color:var(--bl);border-color:var(--bl)}.c.SCN{color:var(--or);border-color:var(--or)}
+.env{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.env div{border-left:2px solid var(--bl);padding-left:8px}
+.env small{display:block;color:var(--mu)}
+.env strong{font-size:16px;font-weight:600}
+.note{color:var(--mu);font-size:12.5px;margin:8px 0 0;max-width:90ch}
+#chat{height:260px;overflow-y:auto;border:1px solid var(--bd);border-radius:4px;padding:8px;background:var(--bg)}
+.u{color:var(--or);margin:8px 0 2px}
+.a{margin:2px 0 8px}.a small{display:block;color:var(--mu)}
+.row{display:flex;gap:8px;margin-top:8px}
+button{background:var(--bl);color:#fff;border:0;border-radius:4px;padding:7px 14px;font:inherit;cursor:pointer}
+button.q{background:none;border:1px solid var(--bd);color:var(--mu);font-size:12.5px;padding:3px 9px;margin:6px 6px 0 0}
+summary{cursor:pointer;font-weight:600}
+li{margin:3px 0}
+#cv{display:block;width:100%;height:360px;background:var(--bg);border:1px solid var(--bd);border-radius:4px;cursor:grab;touch-action:none}
+.row select{width:auto}
+</style></head>
+<body>
+<header><h1>PLANETARY LAB</h1>
+<p>Compare NASA’s Perseverance rover with a modified design on the Moon, Mars and Earth analogue sites. Every number is calculated here and tagged as published, derived, modelled or scenario.</p></header>
+<div class="g">
+<aside><div class="p">
+<h2>Test scenario</h2>
+<label>Site (terrain data)<select id="reg"></select></label>
+<details><summary>Upload your own terrain</summary>
+<label>GeoTIFF elevation file (.tif)<input type="file" id="up" accept=".tif,.tiff"></label>
+<label>Data is for<select id="ub"><option>Earth</option><option>Moon</option><option>Mars</option></select></label>
+<label>Cell size east-west (m)<input type="text" id="ux" value=""></label><label>Cell size north-south (m)<input type="text" id="uy" value=""></label>
+<label>Patch width (m)<input type="text" id="uw" value="640"></label><label>Shift east / north from centre (m)<input type="text" id="ue" value="0"><input type="text" id="un" value="0"></label>
+<div class="row"><button id="ug">Build terrain</button></div><p class="note" id="us">Cell sizes are filled in from the file. Correct them if the file uses a planetary projection, then press Build.</p></details>
+<label>Soil (scenario, not measured site data)<select id="soil"></select></label>
+<label>Gravity and radiation<select id="bd"><option value="Earth">Earth (as at the site)</option><option value="Moon">Moon (what-if)</option><option value="Mars">Mars (what-if)</option></select></label>
+<div id="gS"></div>
+<h3>Modified rover</h3><div id="gM"></div>
+<h3>Surface hazards (scenario, terrain view)</h3><div id="gH"></div>
+<h3>Shielding model (scenario)</h3><div id="gR"></div>
+<p class="note">The reference rover always uses NASA’s published specifications. Both rovers face identical terrain, gravity, soil and mission.</p>
+</div></aside>
+<main>
+<section class="p"><h2>Environment</h2><div class="env" id="env"></div><p class="note" id="envn"></p></section>
+<section class="p"><h2>Reference Perseverance vs modified rover</h2>
+<div class="sc"><table id="tb"></table></div>
+<div id="route" class="note"></div>
+<p class="note"><span class="c PUB">PUB</span> published or user-set value <span class="c">DER</span> derived by formula <span class="c">MOD</span> modelled <span class="c SCN">SCN</span> scenario assumption. Green or red only shows the direction of change in this scenario; it is not proof of a better design.</p></section>
+<section class="p"><h2>3D mission view</h2>
+<canvas id="cv"></canvas>
+<div class="row"><button id="pl">Pause</button><button id="rs">Restart</button><select id="sp" aria-label="Playback speed"><option value="25">25× real time</option><option value="100" selected>100× real time</option><option value="400">400× real time</option></select><select id="tm" aria-label="Terrain"><option value="plane">Schematic slope plane</option><option value="dem" selected>Real terrain (site DEM)</option></select></div>
+<div class="sc"><table id="tt"></table></div>
+<p class="note" id="ts"></p>
+<p class="note">Grey rover: NASA reference. Orange rover: your modification. Both start together on the same slope. Wheels are drawn at your wheel diameter and width, spin at the commanded wheel speed, and ground speed is reduced by the modelled slip. The route is drawn as 24 m for display; the table shows real metres. Sinkage is applied at true scale, so it is barely visible. The ground is a schematic tilted plane, not a DEM mesh. Rocker-bogie links are drawn static; robotic arm and obstacles are not included yet. Drag to rotate, scroll to zoom.</p></section>
+<section class="p"><h2>JARVIS in assist mode</h2>
+<div id="chat"><div class="a">I analyse, calculate and recommend. I cannot drive the rover. Ask about slopes, energy, radiation, thermal limits or how your modifications compare.</div></div>
+<div class="row"><input type="text" id="ask" placeholder="Can it cross a 20 degree slope?" aria-label="Ask JARVIS"><button id="go">Ask</button></div>
+<div id="qs"></div></section>
+<details class="p"><summary>Data sources and assumptions</summary>
+<ul>
+<li><b>Published (NASA):</b> mass 1,025 kg, wheel diameter 0.526 m, six wheels, rocker-bogie suspension, MMRTG output about 110 W at launch, top speed about 0.042 m/s. Check each against the NASA press kit before presenting.</li>
+<li><b>Assumptions (unpublished):</b> wheel width 0.40 m, peak torque 150 N·m per wheel, drivetrain efficiency 85%, battery 2,000 Wh, housekeeping load 50 W, thermal conductance 1.5 W/K, minimum electronics temperature 233 K, rolling coefficient 0.02, slip limit 50%.</li>
+<li><b>Soil:</b> the loose sand-like preset uses textbook dry-sand Bekker and Janosi values; the others are invented scenarios. None describe a real site.</li>
+<li><b>Radiation:</b> Moon is Chang’e-4 LND (far side, not the pole). Mars is Curiosity RAD (Gale, not Jezero). Earth values are rough background scenarios. Verify all dose rates against the papers before submission.</li>
+<li><b>Terrain:</b> built-in patches are real elevation (ArcticDEM for Haughton, Copernicus GLO-30 for the Ladakh box). Uploaded GeoTIFFs are cut to a 64×64 patch in your browser and never leave it. Rocks and craters are random seeded scenario features, not measurements. Rocks taller than one wheel diameter count as hard obstacles (a rule of thumb), and dense patches of them are blocked or slowed using a simple density model. Analogue similarity scores come from the separate Python package.</li>
+</ul></details>
+</main></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>window.SITES={"haughton":{"n":64,"cell":10,"h0":186.1,"rel":55.1,"d":"BQIFAgMC/gH1AeoB3wHSAcEBrAGVAYIBeQFwAWUBWQFMAUABNQEuASgBIQEcARoBGAEWARMBEAENAQkBBQH/APkA8QDrAOYA4gDdANsA2ADYANgA1wDaAOEA5QDlAOUA5wDuAPkABAELAQ8BEwEaASUBMAE4AT0BPQE7AT0BQgEEAgQCBAIAAvgB7gHjAdYBxwG3AagBngGaAZIBiQF+AW4BXQFRAUoBRgE/AToBOAE3ATcBNwE4ATgBNQExASwBJAEcARYBEAELAQQBAAH+AP4A/wAAAQMBBgEHAQgBCgELAREBHAElASsBMAE1ATsBQwFLAVEBUwFSAU8BTQFOAQACAQICAv8B+AHtAeIB1AHIAb4BtwGzAbABrAGnAaABlQGFAXYBbAFlAV8BXQFeAV4BXAFeAWEBYwFiAV8BWgFTAUwBRgFBAToBMwEsASkBJgElAScBKAEoASYBJgEpAS4BNAE6AT8BQgFHAU4BVQFZAV4BYQFjAWABXAFaAVoB/AH9Af4B/AH0AeoB3QHRAcoByAHHAcYBxgHFAcMBwAG6AbIBqwGkAZgBjQGNAZMBlgGUAZMBkwGWAZYBkgGNAYQBfAF0AWwBZwFfAVYBTgFJAUcBSQFKAUsBSgFKAUoBSwFPAVEBUgFUAVkBYAFnAWoBbAFuAW8BbQFrAWkBagH5AfoB+QH3AfAB5QHZAdABzwHTAdYB2QHcAd4B3QHbAdkB1wHWAdIByAG5AbUBvAHEAcYBxgHGAcgByQHHAcMBvAG0AakBnwGZAZIBigGAAXgBdgF2AXcBeAF0AW4BZwFjAWMBZQFmAWcBawFvAXUBewF+AX8BfwF+AX8BfgF+AfQB9gH1AfMB6wHgAdcB1AHZAd8B5gHrAe8B8QHzAfMB8wHyAfAB6QHeAdEBzQHSAdgB3QHfAeAB4QHhAeAB3QHZAdIBygHCAboBswGtAacBowGhAZ4BmQGUAYoBgAF4AXYBeAF6AXsBfQGAAYQBiAGMAY8BkQGRAZEBkwGSAZEB7wHwAe8B7AHkAdwB2QHdAeUB7wH3AfwBAAIDAgUCBgIGAgMC/wH4Ae0B4gHdAd8B4wHoAeoB7AHtAewB6wHoAeQB3QHWAc8BxwHAAbsBtwG1AbMBrwGoAZ4BkQGJAYgBigGNAY8BkgGXAZoBnQGdAZ4BnwGhAaMBowGjAaIBogHpAegB5gHiAd4B2wHfAegB8wH+AQcCCgIOAhACEgIRAg8CCwIHAgEC+QHwAesB6wHuAfEB8wH0AfUB9AHxAe4B6QHjAdwB1gHPAckBxQHCAcABvgG5Aa8BogGXAZYBnAGiAaQBpgGsAbIBtQG1AbQBtAG1AbQBsQGwAbABrgGuAeIB4AHdAdsB2gHdAeYB8QH8AQcCEAITAhYCGAIYAhcCEwIPAgsCBwIBAvsB9gH2AfkB+wH8AfwB/AH6AfUB8AHrAeUB3wHaAdUB0QHNAcwBygHGAbwBsAGlAaMBqgG0AbsBvAG+AcIBxgHHAccByAHKAcsBxwHAAb4BwAG+AbkB3QHaAdgB2QHcAeIB7QH2Af8BCgISAhcCGgIbAhsCGQIVAhECDQIJAgUCAAL+AQACAwIDAgMCAQL/AfwB9gHxAewB6AHkAeAB3AHYAdYB1AHQAccBuwGxAbEBuAHBAcoBzwHQAc4B0AHTAdUB1wHaAdsB3AHXAc4B0AHWAdMBxgHYAdYB1gHaAeAB5wHvAfgBAAIJAhICGAIbAhwCGwIaAhYCEwIPAgsCBwIEAgUCBwIJAgkCBwIEAgEC/AH3AfIB8AHtAeoB5wHkAeEB3gHYAc8BxQG9Ab0BxgHOAdQB2QHcAdwB2gHbAd4B4QHkAecB5wHmAeEB2gHdAeYB4AHLAdIB0wHWAd0B4wHpAe8B9wH/AQgCEQIXAhoCGwIbAhoCFwIUAhACDQIJAggCCQILAgwCDAIKAgcCAgL+AfoB9gH1AfMB8AHsAegB5QHeAdUBzAHGAcYBzQHXAdwB3wHiAeQB5QHlAeYB6AHqAewB7QHsAekB5AHgAeUB7AHjAccBzQHQAdUB2wHiAecB7QH0AfwBBwIQAhYCGQIaAhsCGgIYAhUCEgIOAgwCCwIMAg4CDgINAgwCCAIEAgAC/QH7AfoB9wHyAe0B5wHiAdoB0QHNAc8B1AHbAeIB5wHrAe0B7gHvAe8B7wHwAfEB8wHyAe8B6wHnAeUB6AHsAeEBvQHHAcwB0AHWAdwB4QHnAe4B+AEEAg4CFAIYAhkCGQIZAhgCFQISAg8CDQINAg0CDwIPAg4CDQIKAgYCAwIBAv8B/QH4AfEB6QHiAdwB1gHUAdgB3wHlAeoB8AH1AfkB+gH5AfgB+AH4AfkB+QH5AfcB9AHxAe4B6wHnAd0ByAGkAcABxQHKAc8B1QHbAeEB6QHzAf8BCgISAhYCFwIXAhcCFwIUAhECDgINAg0CDgIOAg4CDgINAgsCCQIHAgUCAwL/AfYB7QHlAd4B2gHaAeEB6QHvAfQB+AH8AQACAwIEAgMCAQIBAgECAQIAAv4B+QH0AfAB7QHsAeABxQGoAYoBtgG9AcQByQHOAdUB3AHlAe8B+gEEAg0CEgIUAhUCFQIUAhECDgIMAgsCCwILAg0CDgIOAg0CDQILAgoCCQIGAv8B9AHqAeMB3wHgAecB8QH5Af0B/wECAgYCCQIKAgoCCQIJAgkCCQIIAgUCAAL4Ae4B5gHjAeABzQGpAZABewGsAbUBvQHCAcgB0AHZAeIB6wH0Af4BBgIMAg8CEQIRAg8CDQIKAggCBwIGAgcCCQIKAgsCDQINAg0CDAILAgcC/gHyAeoB5gHnAe0B9wH/AQUCCAIJAgwCDgIPAg8CDgINAg0CDQINAgsCBgL+AfMB5gHbAdQByQGvAZMBhAF9AaIBrAG0AbsBwgHKAdQB3gHnAe8B9wH+AQQCCAIKAgoCCAIHAgUCAwIBAgACAQICAgQCBgIIAgsCCwIKAgkCBQL8AfEB7QHuAfMB+wEFAgsCDQIOAhACEQISAhECEAIOAg4CDgIPAg8CDAIGAv0B7wHeAc4BvwGsAZYBhwGEAY8BmAGiAaoBsgG6AcMBzQHYAeEB6gHwAfYB+gH+AQECAgIBAgAC/gH8AfoB+QH5AfoB/AH+AQECAwIEAgUCBQIBAvkB8wH0AfkBAAIIAhACEgISAhECEgISAhECEAIPAg0CDQINAg0CDQIKAgMC+QHqAdQBvgGpAZYBiwGIAZMBqQGOAZgBoAGoAbABuAHDAc4B2AHiAekB7gHyAfUB+AH6AfoB+gH3AfUB8wHyAfIB8wH0AfYB+AH7Af0B/gH/Af0B+gH5Af4BBAIKAhACFAIVAhQCEwITAhICEQIPAg4CDAILAgkCCAIGAgAC+AHuAd0BwwGpAZcBjQGLAZYBqgHAAYUBjgGWAZ0BpQGtAbcBwQHLAdYB3gHkAekB7QHwAfIB8wHyAfAB7gHsAesB6wHrAewB7gHxAfUB+QH7AfsB+wH9AQACBwIMAhACEwIWAhYCFQIUAhMCEgIRAhACDgIMAgoCBwIEAv4B9gHsAd4BygGuAZgBjgGNAZYBqgHAAdUBewGEAYsBkwGaAaIBqwG0Ab4ByAHSAdkB3wHjAecB6QHpAekB6AHnAeYB5QHkAeUB5gHoAewB8gH5Af0B/QH/AQICCAINAhECFAIWAhYCFgIWAhUCFQIUAhICEQIPAg0CCwIIAgQC/gH0AeYB0QG0AZsBjwGMAZQBpQG9AdQB6AFyAXoBgQGJAZABlwGfAagBsQG7AcQBzAHSAdcB2gHeAd4B3wHfAd8B3gHeAd0B3QHfAeIB5wHuAfgB/gEBAgQCCAINAhACEwIVAhYCFgIWAhYCFgIVAhQCEwISAhACDwIOAgsCCAIBAvYB5QHHAaIBjwGLAZABngG0Ac4B5AH4AWoBcQF4AX8BhQGNAZUBnQGlAa4BtgG9AcQByQHOAdMB1QHVAdUB1QHVAdUB1QHWAdgB3AHgAegB8QH6AQACBQIKAg0CEAISAhQCFAIUAhUCFAISAhACDgIMAgsCCwINAg4CCwIHAv8B8wHfAboBlgGKAY0BlwGpAcMB3wH0AQUCYgFoAW8BdgF8AYMBigGSAZoBogGpAa8BtQG8AcIByAHMAcsBygHKAcsBzAHMAc4B0QHWAdsB4gHqAfMB+gEBAgYCCgINAhACEQISAhICEQIPAgsCBgICAv8B/QH+AQACAgIAAvwB9QHpAdMBrAGPAYoBkQGhAbUB1AHxAQUCFAJbAWABZwFtAXMBegGBAYgBkAGYAZ4BowGnAa0BtAG8AcABwAG/Ab8BwQHCAcQBxwHLAdAB1QHcAeUB7QH1AfwBAgIGAgoCCwIMAgwCDAILAggCBAL9AfYB8gHvAe4B7wHvAe4B6wHmAdkBwgGdAYoBigGWAakBwQHhAQACFAIgAlQBWAFeAWQBagFwAXcBfgGFAY0BkwGYAZsBnwGlAasBsAGyAbMBtAG2AbgBuwG+AcQByQHPAdYB3gHoAfAB9wH9AQICBAIEAgUCBQIFAgQCAgL9AfUB7QHoAeYB5QHjAeAB3QHaAdUByAGvAZMBiAGKAZkBsgHNAewBBwIaAiUCTQFQAVQBWgFhAWgBbgF0AXoBgQGGAYwBkAGUAZcBnAGgAaQBpgGpAasBrgGyAbcBvAHCAckBzwHWAd8B6AHwAfYB+gH6AfsB/AH9Af0B/QH6AfQB7QHnAeUB5gHoAeUB3wHZAdIByQG5AaEBjgGIAYoBnAG4AdQB8wELAhsCJwJGAUkBTAFRAVgBXgFlAWwBcgF4AXwBgAGEAYgBiwGPAZIBlwGbAZ4BogGlAaoBrgG0AboBwAHGAcwB1AHcAeQB6gHuAfAB8QHzAfQB9AHzAfAB6wHlAeMB5gHtAfEB7QHnAeEB2gHOAbcBmwGLAYcBigGcAbkB1wH0AQoCGAIkAj8BQQFEAUkBTgFVAVwBYwFpAXABdQF3AXoBfAGAAYQBhwGMAZEBlQGaAZ0BoQGlAaoBsQG2AbwBwgHIAc8B1gHcAeAB4wHmAegB6gHqAekB5wHjAeAB4gHqAfQB9wHzAe0B6AHgAdEBtQGXAYkBhwGKAZoBtgHVAfABBQIUAiACNgE5ATwBQAFGAUsBUgFaAWABZwFsAW8BcAFyAXYBewF+AYMBiAGNAZEBlAGYAZsBoQGnAa0BswG4Ab4BwwHJAc8B0wHYAdsB3QHfAd8B3wHeAdwB3AHiAe4B+QH8AfkB8wHrAd4BygGsAZIBiAGHAYoBmQGzAc4B6AH9AQ8CGwIsATABMwE3ATwBQQFHAU8BVgFcAWIBZgFpAWsBbwF0AXgBewF/AYQBiAGMAY8BkgGYAZ4BpAGqAbABtQG6Ab4BwwHHAcwB0QHTAdUB1gHWAdYB1QHYAeEB7wH6Af4B/AH1AekB2gHDAaMBjgGIAYcBjAGeAbYBygHfAfMBBAIQAh8BJAEoAS0BMgE3ATwBRAFLAVEBVwFdAWIBZgFqAW4BcQF0AXgBfAF/AYMBhgGJAY4BlAGbAaIBpwGsAbEBtAG4AbwBwgHGAckBywHNAc4BzwHPAdMB2wHnAfEB9wH1AewB4AHQAboBnAGLAYcBhwGPAagBvwHNAdsB6gH3AQICEgEXARwBIgEoAS0BNAE7AUIBRwFNAVQBXAFiAWcBaQFqAWsBbwFzAXcBegF9AYABhAGKAZIBmAGdAaIBpgGqAa4BsgG3AbwBwAHCAcQBxgHHAckBzAHSAdoB4QHnAegB4AHTAcMBrQGVAYkBhgGIAZQBrgHFAdEB3AHmAfEB+QEHAQoBDwEWAR0BJAEsATQBOwE/AUQBTAFVAWABZgFnAWYBZAFlAWkBbQFwAXQBeAF8AYEBhwGNAZIBlwGcAaABpQGpAa4BswG3AbkBuwG9Ab4BwQHFAcoBzwHTAdYB1wHPAcIBsgGgAY8BiAGGAYoBmgGzAcgB1AHeAegB8QH4Af4AAQEEAQkBEQEaASQBLQE0ATkBPgFEAVABXwFnAWUBYQFeAV0BXgFiAWUBagFuAXMBdwF8AYEBhwGMAZEBlgGbAaABpAGpAa0BsAGyAbQBtgG5Ab0BwgHFAccBxgHEAbwBrwGkAZoBjwGIAYcBjwGlAbsBywHXAeIB6wHzAfoB9gD7AP0AAAEEAQwBGAEkASwBMwE4AT4BSQFZAWIBXwFZAVYBVQFVAVgBWwFgAWQBaQFtAXIBdwF8AYEBhwGMAZEBlQGaAZ8BowGnAaoBrAGuAbEBtQG5AbwBvgG9AbkBsgGpAaQBnwGTAYkBiQGWAbABwgHNAdoB5QHuAfYB/QHwAPYA+AD4APkA/gAJARcBIgEpAS8BNAE9AUoBUwFTAVABTwFOAU0BTwFRAVUBWgFfAWQBaQFtAXIBdgF7AYEBhgGLAZABlgGaAZ4BoQGjAaYBqQGtAbEBtAG3AbcBswGvAa0BrwGpAZcBiQGKAZsBtgHFAdAB3QHoAfAB+AH+AewA8wDzAPMA8wD0APwACgEWAR4BIwEoAS4BOQFCAUYBRgFGAUYBRQFGAUcBSwFQAVUBWgFfAWQBaAFsAXEBdgF7AYABhgGMAZABlAGXAZoBngGhAaUBqQGtAbABsAGwAbIBtwG6Aa4BlgGJAYsBnwG5AccB0wHfAekB8AH4Af4B4gDsAO4A7wDuAO0A8gD/AAwBFQEZARwBIgEqATMBOAE6ATwBPQE9AT4BPwFBAUUBSgFPAVUBWgFeAWIBZgFrAXABdQF7AYEBhQGJAY0BkQGUAZgBnQGhAaQBqQGtAbABtgG7AbkBqAGSAYkBjAGgAbkByAHVAeAB6QHwAfcB/QHMANwA6ADtAOsA5wDpAPEAAAEOARIBEwEWARsBIwEqAS0BLwExATQBNgE2ATcBOgE+AUMBSQFOAVIBVwFbAWABZQFqAW8BdAF5AX0BggGGAYoBjwGTAZgBnAGhAacBrAGyAbQBrwGdAY0BiAGNAaABuAHIAdQB3wHoAe8B9gH7AbUAzQDoAPAA6wDkAOEA5QDyAAMBCQEKAQwBDgEUARsBHwEiASUBKAErASwBLgEwATIBNwE9AUIBRwFLAU8BVAFaAV4BYwFoAWwBcQF2AXoBfwGEAYoBkAGVAZkBngGiAaYBpwGiAZQBigGIAY4BnwG2AcYB0wHeAeYB7QHzAfcBmgC1ANYA6QDrAOMA3QDdAOQA8gD6AAABAgEEAQgBDAERARUBGQEcASABIwEmASgBKQErATABNgE6AT8BQwFIAU4BUwFYAV0BYAFkAWkBbgFzAXkBgAGIAY0BkQGVAZgBmwGbAZYBjAGHAYkBjwGeAbMBwwHQAdoB4QHoAe4B9AF2AI8AqwDGANwA3wDaANYA2QDhAOoA8AD0APgA+gD8AAEBBwEMAREBFgEbASABJAEjASMBJQEpAS4BMgE3ATwBQQFHAUwBUgFUAVcBWwFhAWYBbQF0AX0BgwGIAYwBkAGTAZMBjgGHAYcBigGPAZ0BsQHAAcwB1gHdAeMB6QHvAUkAXgB6AJQAsADIAM8AzQDOANMA2gDfAOMA6ADrAO0A8QD3AP0AAwEJARABGQEhASMBHwEeAR8BIgEmASsBMAE1ATsBQAFGAUkBSwFOAVMBWAFeAWUBbgF3AXwBggGHAYkBiAGFAYMBhgGLAZABnAGtAbsBxwHQAdgB3gHlAesBLwA2AEcAYAB5AJQArAC5AMAAxQDLAM8A0wDXANoA3ADgAOUA7ADzAPoAAgENARwBJQEjAR4BGwEaARwBHwEjASgBLgEzATgBPAE/AUIBRgFKAU8BVQFfAWkBcAF2AXsBfQF8AXsBfgGEAYoBkAGZAacBtAG/AckB0QHYAd8B5gEsACoALAA2AEcAXQB1AI8ApQCyALkAvwDCAMUAxwDKAM4A0wDaAOMA6gDyAPsACQEZASEBIQEcARcBFQEWARgBHAEgASQBKQEuATIBNgE5ATwBQQFGAVABWgFiAWkBbgFwAXABcgF5AYEBhwGNAZUBoAGsAbcBwQHKAdIB2QHhAToAMQAsACkAKwA1AEUAWABxAIcAmACmAK8AsgCzALYAugDAAMgA0gDYAN8A5gDvAP0ADwEdASABGQETAQ8BDwEQARQBGAEcASEBJQEpASwBMAE0ATkBQQFLAVIBWAFeAWEBZAFpAXIBewGDAYgBjwGZAaQBrwG5AcMBywHTAdsBVQBJAD0AMgAoACYAKgAyAD4AUABjAHoAjwCaAJ4AoAClAKwAtwDDAMgAzADTANoA4wDzAAgBGAEaARMBCgEFAQYBCAELAQ8BEwEXARoBHgEiAScBLAEzATsBQAFHAU0BUgFWAV0BaAF0AXwBggGHAZABmwGmAbEBuwHEAcwB1QF2AGoAWgBJADgAKwAlACQAJwAuADoASgBfAHYAhQCNAJIAmACkALEAtgC5AL8AxwDQANwA7AD+AAwBDQEEAfwA+gD7AP4AAQEEAQcBCwEPARQBGQEfASUBKwEwATUBPAFBAUcBTwFbAWgBcQF3AXwBhAGPAZsBpwGyAb0BxwHPAZcAigB6AGgAUwBAADEAJwAiACEAJQAtADgASwBiAHQAfgCFAI0AmACfAKMAqQCyALwAxgDSAN8A7QD2APMA7gDtAO8A8QDzAPQA9gD6AP8ABAEJAQ8BFgEcASABJgEsATEBNgE/AUsBVwFgAWgBbQF1AYABjgGbAakBtgHBAckBsgCnAJoAiABxAFoASAA4ACsAIwAgACAAJAAsADsATgBfAGoAcwB7AIQAjACSAJoApACvALoAwgDKANMA2ADbAN4A4ADiAOMA5ADmAOgA7QDyAPcA/AADAQsBEgEYAR0BIwEpAS8BOQFDAUwBUwFaAWMBbgF8AYwBnAGsAbcBwAHEALwAsgCkAI4AdgBiAFAAPwAuACMAHgAdAB8AJAAuADoARABKAFAAWgBkAG8AegCGAJEAnAClAKgArQC2AMIAygDOANEA0gDTANUA1wDbAN8A5ADpAPAA+QABAQkBDwEXAR8BJQErATIBOAE+AUUBTgFaAWgBeAGKAZsBqgG1AdEAygDDALoAqgCSAHoAZwBVAEIAMQAlAB8AHAAcAB8AIwAnACgAKQAsADIAOwBHAFUAZQBzAIAAigCUAJ8AqQCyALoAvgDAAMIAxADHAMoAzQDRANUA3ADlAO4A9gD+AAkBFgEdASMBJwEqASwBMQE4AUIBUAFhAXUBiQGaAagB3ADWANEAygC/AK0AlwCBAGwAWQBHADcAKwAjAB0AGwAbABwAHAAcABwAHQAdAB8AJwAyAEIAVABlAHcAhgCRAJsAowCqAK4AsQCzALYAuQC9AMEAxADJANEA2gDiAOsA+AAFAQ4BFQEaARwBHwEjASgBLwE5AUkBXwF1AYkBmwHkAN8A2wDXAM8AwgCyAJ4AhwBxAF4ATQA+ADIAKAAgABwAGQAYABcAGAAXABcAFgAWABkAHwAqADoATgBhAHAAfQCIAJMAmgCeAKEApACoAK0AsgC3ALoAvwDGAM4A1gDjAO8A+AAAAQcBDQESARgBHwElASwBNwFKAWABdwGNAesA6ADlAOEA2gDRAMUAtgChAIoAdQBhAFIAQwA1ACsAIwAdABkAFwAVABQAEwASABEAEQASABQAGgAnADYARABSAGEAcAB9AIYAjQCRAJYAnACjAKkArgCwALUAugDBAMsA1wDiAOwA9QD8AAQBDgEWARwBIgEsAToBTAFkAXwB8gDvAO0A6QDjANwA0gDEALQAogCNAHYAYQBRAEIANwAuACYAIAAbABcAFQASABEADwAOAA0ADQANABAAFQAeACcAMwBBAE4AWwBqAHcAgACIAJAAmQCgAKEAowCmAKoAsgC+AMoA1wDhAOsA9QD/AAkBEgEaASMBLgE7AU8BZwH7APgA9gDzAO0A5gDcANAAwwC0AKIAiQBxAF4ATwBDADoAMQApACMAHwAbABgAFgAUABEAEAAOAAwACgAKAAsADQAQABYAIAArADsATwBfAGwAdgCDAIsAjACOAJIAlgCaAKMAsADAAM4A2wDlAO8A+wAHAREBGwEkAS8BPQFRAQgBBQECAf4A9wDvAOYA2wDQAMMAtACfAIYAbwBeAFEARQA6ADIAKwAnACMAIAAdABkAFwAVABMAEQANAAsACQAIAAcABgAHAAwAFQAjADQARQBSAGMAcAB2AHsAgQCHAIsAkACaAKoAugDHANIA3gDtAPsABwERARsBJQEyAUIBGgEUAQ8BCAEBAfoA8QDnAN0A0wDIALkAowCMAHUAZABVAEYAOgAyAC0AKQAlACEAHQAaABgAFgATABAADgALAAoACAAGAAQABAAFAAoAEwAgAC4APQBNAFoAZgBzAH0AggCGAIsAlAChALAAvwDOAN4A7wD8AAgBEwEeASoBOAErASMBGwETAQsBAwH6APEA6QDiANoAzgC+AKsAlAB+AGoAWQBJADwAMwAuACoAJgAjAB8AGwAYABQAEgAQAA0ACwAKAAgABgAEAAMAAgAFAAwAFgAhADAAQABSAGUAcwB6AH4AgACEAIsAmQCrALwAzgDgAO8A/AAJARUBIgEwATUBLQEkARwBFAELAQIB+gD0AO4A5wDeANQAxgC1AJ4AhQBwAF4ATQA9ADQALwArACgAJAAgABwAFwAUABIAEAAOAAwACgAHAAUAAwABAAEAAwAJABEAHQArAD4AVABnAHIAdwB6AHwAfwCIAJYAqAC8AM8A4ADvAPwADAEaAScBOwE0ASwBJQEdARQBCwEEAf8A+gD0AOwA5QDcANEAwACpAI8AeQBmAFIAQgA3ADEALQApACQAIQAcABkAFQATABAADgAMAAkABgAEAAIAAAAAAAIABQALABUAJwA/AFgAZwBvAHQAdgB3AHsAhACTAKYAugDMAN0A7gAAAQ8BGgE=","lat":75.445,"lon":-89.782,"desc":"ArcticDEM v4.1 10 m, tile 29_29: a 640 m patch at 75.445°N, 89.782°W, about 9 km from the Haughton crater centre"},"ladakh":{"n":64,"cell":30,"h0":4728.0,"rel":265.5,"d":"JwRWBIoEvwTmBPoExQQyBMkDawNUA+0DoQRaBBMEUwSBBJIEpQS8BNUEBAVFBZoFzgXDBboFxQXZBfIFDwY7BqEGAgfWBqIGYgYaBtgFkQU/BfMEqQRPBPUDoANPAxMD4wJ8AhgCAwIrAl0CagJfAhACnwEhAaMAOAAAAA8ANwB3BK4E0QQABToFXwUdBXwECASwA2cDkwMVBAoEGARoBJEEpAS4BNME8gQiBWIFzAUaBv8F2gXdBe4FBAYmBmwG4gYcB9oGrwZ5BjoGBwbCBXIFJAXmBJIEOQTSA04D1AJ/AkQCCgLIAbYBwAG+AcMBeQESAaYATAAfAB0ANgBhALIE6AQWBUwFgwWsBVkFtwRCBPYDrQOHA6gD2AM/BIIEnwSzBMsE7QQWBUoFfAXcBUUGKgb8BfYFAAYXBkYGpQYbBycH3Qa2Bo0GWgYlBuIFmgVWBSkF5QSWBCQEbwPKAnMCbwJHAs0BcgFAASwBJAHjAJIAVwA+AEQARwBfAIkA2wQOBUcFkQXTBdsFZQXhBIQEQAQABMUDogMFBHQEnwS0BMgE5AQMBUIFcgWkBRUGdgZRBiAGEgYYBjIGawbGBiMHHwfmBr8GmQZsBjEG8wW+BYwFYQUiBcYENARyA8MCmALHAoYC/gGGASMB6wDEAIkAYgBeAGkAbQB1AI0AsQD2BCcFawXNBRgGAwaGBQgFuQSBBEkEBgTRAzcElASxBMkE4wQFBTUFZwWUBdIFWQakBnYGSgY6BjkGUAZ/BskGDAcBB9gGuQacBnIGPgYDBt0FtQVyBR0FpQTxA00DyALQAgkDuQI5ArcBPQHrAK8AfQB3AIIAjQCVAKMAvwDcAA4FRAWpBSQGVQY+Br4FNQXlBLUEhwQ/BPgDSgSbBLsE2gT9BCsFXAWFBb0FAQZqBq0GlQZxBl4GVAZeBoAGxwb4BtkGogaBBnIGXwY8BggG3wXABWwF+ARuBLADFQPXAg8DLQPNAk4CzwFVAfAAsACQAJcAowCvAL0AzwDwABEBLAVvBQMGlgaiBnUG+gV6BRoF6AS4BGwEHARmBKAEwgTqBBsFUgV/BaYF9wVPBpMGsgamBn8GYgZUBlUGdwbCBusGvgZwBjAGHAYfBhEG6gW/BaEFUQXNBDIEdwMHAwYDUgNGA88CRwLIAVAB4wCxAKkAsgDBANYA7gABASUBSwFPBZUFLgbJBtYGkAYuBrwFXAUoBdcEcwQ4BHEEowTSBAkFQwV2BZ8F1QU7BqoG0Qa8BqMGhQZbBkMGQwZlBqwG3QayBmcGCQbFBbgFuwWxBY0FbAURBZAE2gNIAyUDSAOWA3AD3AJDAq4BMAHUAMIAyADRAOIA+wAbATMBWwGFAXMFuAU3Bs0G2gaWBkcG3AWJBUoF6QSABFoEgQS1BPgEMwVpBZYFxgUPBoQG5AbfBroGkgZyBlAGLgYlBj4GiAbNBq4GcgYdBrIFYAVIBVIFRgUjBc8EWwSkA1MDWwOUA8gDgAPqAj4CkgESAd8A4QDpAPMABAEcATgBWwGJAbMBlwXbBUsG2AbiBpMGKgbbBYwFOAXcBI0EfgSWBNEEEwVHBYEFwwUJBm8GywbiBs8GtQaEBlQGNwYXBv0FCQZRBqsGqgZ2BjYG0wVYBf8E4ATkBLMESgToA40DfAOeA+IDxwNmA9QCJwJ9AQ4B/QADAQoBGAEsAUMBYAGCAa8B3gHGBQ8Ghwb3BugGnAYZBsAFeQU1Bd0EoQSdBLIE7wQnBVUFnwUEBlsG2QYCB9oGuQakBn4GQAYcBvsF2wXYBRcGeganBmsGMQbqBYYFCgWeBHoEQgTZA6QDmgOvA+4DEgSxAyoDmgIDAnIBJQEiASYBMwFEAVYBbwGNAa8B1QEIAu4FPgatBvwG2QaKBhcGrgVvBTgF9QTZBMYE4wQbBUYFbgW2BSEGiwbmBu0GwAabBosGeQZBBhsG6gXKBbUF3wU+BpcGcgYlBuMFkAUkBa0ENgT1A8UDtQPNA+0DHwQSBKwD+gJkAtoBaAFFAUkBTwFeAXQBhQGYAbYB3wEEAjYCDAZtBs4G8wbHBnQGIAbGBXcFRwUmBR0FCQUoBWQFhgWaBcMF/gVEBpgGvgagBn4GbgZzBlcGJwblBcQFoQW0BQcGagZrBjIG6gWMBRkFmQQpBOsD0QPlAyEEPwQ8BAwEnAPoAkgCtwFrAW0BbwF+AZEBpAG1AcoB4wEOAjcCZQI5Bq0G8AbkBq8GXAYKBs4FjwVpBV0FXQVgBXkFrAXOBdMF5AX+BSAGWgZ6BnEGXQZWBmYGYQYlBucFwwWTBXsFwgUvBjwGEQbZBZEFNwWNBB8E6wPgAx4EZARfBC4E8wOTA/ICUQK+AY0BlwGdAa4BwgHVAeUB9wERAjoCZwKTAmYGvwbuBtcGlwZKBvYFxgWiBYkFjwWYBaYFxwXzBRAGEQYPBhgGJAY3BkAGQQY+Bj8GVAZiBi0G7gXIBYwFUgV7Bd8F9gXlBZ4FRAUEBXsEHQTqA+4DHAQxBCIE+gPCA34DHQOKAuIBuQHKAdIB4wH9ARUCIgIrAkMCaAKWAsACNAaGBsAGvwaLBjgG9QXWBbsFrQW6BckF3gUDBjAGTwZYBk8GPwY4BjcGMwYvBiwGLwZABlkGHgbsBcMFhwU6BTMFhQWCBXcFTgXjBJwETQQBBOMD8QMJBOQDvQOiA30DVgMOA5kCBwLmAfkBCAIjAkYCYgJsAmcCdgKaAsUC7AIPBl4GmwamBoIGTgYKBu8F3gXXBeAF8QULBjEGWQaEBqoGmQZnBk0GPwYuBiIGGwYkBjMGQgYIBt0FtgVqBRsF8wQZBe8EwQS6BIgEUwQkBA8E6gPMA7sDmANpA0EDMwMhA/UCpwIyAhcCLAJDAmcCmQLDAskCtAKxAs8C9gIfAyUGbAahBp4GdgZLBiAGDQYABvoFAgYWBjQGWAZ/BsIGBQflBpkGagZSBjYGHQYMBhYGJgYjBvoFzwWgBU0F/wTQBL0ElgR+BG0EVQRBBEIETATiA4EDWQNEAygDDQP8AuACtwKEAlcCVgJcAngCowLSAv8CCQP3Au8CBAMmA1EDRwaNBr8GrAZ+Bl4GOgYvBiIGGAYfBjYGVwZ4BqIG9gY+BxUH1AaeBmwGQwYYBvoFBgYdBgwG8AXGBYsFOwXyBMoEsQSnBMwEnARoBFMEWgRfBOsDawNNAz0DLQMbAwgD6QLIArICoAKUApMCrgLWAvwCIwM/A0EDPQNCA2EDhgNoBrIG4wbPBpcGdwZcBlAGQAY0BjkGTgZxBpIGvgYdB2sHPgf0Bq4GgQZQBhwG6AXmBfIF4QXRBasFbwUrBeUEwgSxBPEE7QSdBE4EGwQSBCME1wNyA1QDTgNDAzIDHgMIA/MC3ALPAskCzALmAg0DMgNQA3EDggOBA4QDmAO2A5cG9gYSB/gGugaRBoAGcAZdBlQGWAZrBoUGqQbuBlEHbgc9B/sGqAZ3BkkGHQboBbgFpwWaBZwFhAVPBRoF3QTCBMUE/QTsBJ0ERAQIBOkD2AOrA3IDYgNfA1sDUANDAzIDIAMPAwUD/wIFAyADRgNuA4kDogO4A74DwgPSA+kD5AY8BzoHEQfaBrMGowaUBoMGeAZ3BogGpQbbBj8HagdNBxoH4QamBncGRwYhBu8FtAV0BVUFWgVMBSQFAAXaBMsE0ATxBOEEmQRPBBUE4wO+A50DhAN6A3gDdgN0A24DZQNYA0wDRwNEA0cDXQOAA6UDvwPRA+gD+AP9AwsEGARCB3UHZQc1B/4G2gbIBrcGpwabBpkGpQbABvQGQQdGByYH/gbLBp0GcgYyBvMFvAWKBWMFQQUsBRgFAAXuBOEE2wTaBNsEwQSLBGAELwT0A8oDpwOZA5cDmgOiA6UDoQOaA5YDkwOSA44DkwOfA7gD1QPvAwIEFgQrBDUEPwRLBE4Hmwd/B0sHHQf/BusG2gbLBsEGvgbHBt0GFwdIBzEHDgf4BtcGsQZ+BikG2QWzBZYFewVMBSkFDgUABfgE8QToBOEE0wS+BIsEYQQ1BAIE2gPAA7QDuAPFA9kD5QPqA+YD4QPfA9kD1QPcA+ID8gMIBCAENARFBFkEYgRrBHUEZQe8B60HdAdCByAHEAcBB/IG6AbmBu0G/AYiB0UHMwcPBwEH4Aa6BoQGLAbiBc8FwwWoBXUFSQUjBRIFCgUBBfUE4QTKBK4EgARSBCwEBwTrA9YD0QPZA+sDDQQrBDoEOAQqBCIEHQQaBCIEKgQxBD4EUgRjBHEEfQSFBI4ElASaB+UH4werB4EHTAc5BykHHAcTBxIHFgceBzIHTAdFBykHEgfkBrUGeAYnBvsF/AX4BdQFqwV9BUwFMQUhBRMFAgXkBMMEngRzBEoEKgQNBPoD7QPsA/cDDAQvBFEEaARwBGoEaARtBGsEbgR1BHkEfASHBJQEoASmBKgErgSvBNYHHQgiCPYHxAd/B2QHVQdIBz0HOgc9B0YHWQdoB2QHQQcbB+8GtgZyBjUGJgY2BicG/AXYBa0FdgVWBUQFMgUYBfcE0gSlBHIETQQwBBoECwQBBAMEEAQmBEYEaASGBJsEpQSwBLwEuwS6BL4EvQS9BMAEyATSBNkE2ATTBMsEFwhmCHIISggBCLIHmAeFB3UHaQdjB2YHbQeAB4MHcAdHBxQH3gauBnsGWgZeBmUGRwYgBgAG2AWlBX8FaQVYBT0FHAX0BMYEjQRbBDoEJgQcBBcEHAQrBD8EWwR9BJ8EvATWBO0EAAUDBQMFBwUEBfkE8wT8BAoFHQUpBRMF9gROCKMIsQhzCBsI4AfLB7gHoweWB40HlQeiB58HjAdqBz4HBwfVBrQGlwaMBpIGigZnBksGNAYKBtYFqgWPBYIFdgVbBSsF8AS2BIcEVQQ4BDIELwQ4BEcEWQR3BJsEvwTdBAAFHgUzBT8FRgVFBTkFLAUqBTQFRAVfBXMFYAUzBYAI1wjdCJAIOggRCPwH5QfTB8IHtge/B88HugeWB2gHNQcEB+MG0AbBBr4GwAauBpAGhAZxBkIGCAbTBbgFtAW+BbsFcQUrBesEvQSGBFgESQRKBFYEZQR4BJgEwATlBAUFKAVFBVoFbgV9BXgFZQVfBWUFcAWABZwFsQWfBWcFuwgLCfAInQhcCEEIKggRCAEI7wfkB+sH3ge+B5MHaAc4BxMH/gbxBukG5AbeBs8GyQa/BqcGdAY6BgYG6QXsBQYGEga9BW8FKQXxBLgEfARkBGwEegSHBJ0EwQToBAsFLgVMBWQFewWVBawFqwWUBZIFnAWlBbYF0wXmBc4FkAX/CC8J8giqCH4IaghYCEMINwglCBgIFAjjB7AHhwdoB0UHLAcZBw4HCQcBB/MG7gYAB/AG0AaQBlwGMwYeBicGVAZQBvYFpAVhBSQF7wSzBI4EmASgBKsEwwTpBA0FMAVRBWwFhAWeBbwF1QXXBccFxAXMBdQF5gUEBhsG9AW5BTIJRwkJCc0IpQiSCIcIfAhxCGIIRwgmCOkHrweKB3AHWQdDBzAHKAcmByIHFgcRBxUHBAfkBq8GgwZkBlUGXgaEBmkGIQbVBZMFWwUlBe4EwQS9BMIEzwTpBAoFLAVOBWwFiAWkBcEF4QX6BQQGAAb6Bf0FCQYiBkoGUgYZBuQFXwlcCS8J+QjRCMIIuwi2CKMIhwhbCCcI6ge7B5oHggduB1gHSAdBB0IHSgdBByoHCwfyBtQGsAaXBpAGjwaXBpQGYwYoBusFqgV5BUcFCAXiBNwE5AT0BAsFJgVFBWQFggWgBb8F3gX9BRgGLQY2BjwGSwZnBocGogaIBkUGEQaOCXgJWAkrCQYJ/Aj+CPUIzQicCF8IJQjvB8sHsQeYB4IHbQdhB10HXwdnB1gHNgcCB9cGswaOBnkGggaTBp0GggZHBgkG1QWeBW8FRAULBfUE+AQDBRIFJgU9BVkFdwWVBbYF1gX1BRMGLwZLBl4GcwaZBscG5AbpBr8GeAZABq4JpwmKCWEJRAlGCUIJLAnyCK0IYAgkCP4H4wfHB60HlweEB3sHfAd/B3UHWwc4BwsH1AacBmgGNgYoBjsGTwZGBg0G0gWkBX4FUAUnBQYFAAUKBRYFJQU3BU0FaAWEBaYFyQXoBQgGJgZDBmIGeQaUBr8G8gYRBxgH+Aa0BnIGwwnWCcIJlwmGCYcJcQlDCfkIqwhlCDEIFgj7B90HxgexB50HlQecB5sHggddBzIHDgfZBpMGUAYFBsgFuAXbBfIFvAWGBWIFUwUwBQsF+wT+BAwFGQUpBTwFVQVwBY4FswXYBfYFFAY1BlMGcwaOBqsGzQb6BiYHOwcsB/kGswbWCfsJ+AnVCcYJsgmKCT8J4AidCHAITAgwCBMI+QfjB80HuQeyB7wHqweHB1wHKwcCB9IGmgZUBvoFlQVQBWkFlwVnBTAFHAUnBRUF9wTvBPEEAQUQBSIFNwVTBXEFkwW8BeIFAAYeBkEGYwaBBp8GvAbZBgYHOAdVB1UHOQcDB/cJHAojChMK+AnKCYgJLQnRCJ0IfQhkCEwIMQgYCAII7gfkB9sHzgemB3YHQAcYB/cG0AagBlkG9wWCBRsFBwU2BRMF3QThBAQF/gTkBN8E4ATtBPwEEgUsBUsFbgWYBcYF6gUIBikGTgZxBpAGrgbJBugGGgdLB2sHcwdmB0gHIQo5Cj0KLwoMCs4JewkeCdQIrAiUCIAIbAhQCDQIIAgXCBAI+AfFB48HUgcEB9MGyQbDBpUGSQbnBW4F+QS6BNUEtgSYBLgE5gTiBMsEyATKBNUE5QQABR8FQwVsBaEFzwXvBQ8GNAZZBn4GnQa6BtUG+gYvB10HfQeJB4QHcgc6ClAKUwoyCgMKywl9CSIJ4AjCCK8IngiKCGsIUQg9CCwIEAjlB64HagcZB7kGYgZcBogGfAYuBsAFPQXEBHgEfQReBGsEogTLBMIEqgSqBK4EvgTTBPMEFgU9BXEFpwXQBfEFFQY+BmQGhwamBsMG4gYQB0IHbAeKB5kHmgeOB0gKXgpfCjMK9QnBCYEJMwn7CN4Izgi8CKUIiQhrCEoIHwjsB7YHggc5B9UGZgb3BeIFKQZWBgIGjAUEBYYEMwQmBCAEUwSWBLgEpASJBIwElgSsBMkE6wQRBT8FewWrBc4F8QUbBkkGcQaPBq4GzAbzBiUHUgd3B5IHpgeqB6EHQwpbClgKNwr7CccJjAlPCSEJAAnrCNYIvAiYCHAIQggICMQHegc2B/cGogYrBqoFcgWxBRcGygVTBc4EVgT2A9cD7QMrBGsEiQR5BGYEbgSEBKQExwTtBBcFSwWDBa4F0QX0BSUGWAZ+BpoGtwbZBgYHNAddB4AHnQeyB7YHsAclCk4KVwpFChsK7gmvCWwJPgkhCQkJ8AjICJgIZggtCOsHogdGB9oGmgZoBvwFdgUXBScFowV4BQUFgQQNBLYDkAOqA9MDBAQuBDwERARcBHsEpATMBPgEKQVeBY4FtQXXBf8FNAZmBooGpgbCBuoGGQdEB2sHjgetB78HwwfDBwYKPQpVCk8KMAoGCs4JjgldCUYJMgkCCcsIlwhgCCAIzgdwBwQHigYnBgIGvwVEBc4EoATzBAMFkwQbBKsDZwNaA3MDmgPAA+wDEwQ0BFkEgASsBNYEBwU+BXEFlwW4BeEFEAZFBnIGkgaxBtAG+wYsB1kHgQejB8AHzwfXB9sH+AkvCkoKTgo/ChwK7gm5CYwJcQlLCQUJygiZCF8IIAjIB1oH3QZcBt0FfQU4BeQEfARDBH8EdwQPBKIDTAMvA1IDjgO6A94D+gMbBD4EYQSMBLkE6wQgBVcFgAWcBb8F7QUhBlIGeQaaBroG3wYRB0QHcQeXB7gH1gfnB/EH9AcOCiUKKQorCi4KJAoICt0JtgmJCUwJ/Ai2CIAITggICKoHPgfDBjoGugU6Bc4EdgQfBOkDFATuA4wDLQMKAzIDfgOzA9cDBQQeBDMETARvBJoEyAQBBTkFZQWGBaUFywX7BS8GWQZ9BqIGyQb7Bi8HXQeHB64HzwfrB/wHBwgMCBwK/gnlCdgJ1QnnCfEJ0AmpCXMJMwnzCKcIWwgaCNEHbAf0BnwGCgaQBRcFoQQrBMEDhwOXA10DBgPjAhIDYAOrA9AD6AMQBCkEOgRUBHkEqATeBBkFRgVqBY0FsQXbBQoGMwZaBogGuQbqBhwHSQd0B6AHxwfmB/8HDggaCB8I0AmvCYMJZgllCY4JvQm0CYgJVAkJCcoIewgqCOAHkQcgB6wGLgauBTcF0gRoBPQDjQM8AyAD7wK5At8CKgN2A7AD0APsAwkEIAQ4BFQEfwS2BPMEJwVOBXIFmgXABecFDwYzBmMGnQbTBgQHMgdfB40HtwfaB/kHDgghCC0IMQiFCVQJGgnuCPEIIglgCYQJZQkuCc8IaggKCMMHkQdxB/kGbwbpBVsFxwRiBBAErwNSAwYDyQKgAqQCBANXA5IDrwPGA+ED/QMYBDYEVQSLBMsEAwUuBVQFegWiBcgF8AUWBj0GdAauBuQGFQdGB3cHogfIB+oHBwgdCDEIPghBCEIJ9QigCG4IfQinCOwIOQk2CfwInAgSCHMHNAcFB/4GrAYzBq0FIQWOBAkEowNcAw4DyQKQAm8CowImA2sDiQOfA7oD2wP2AxQENgRkBJwE1AQCBTUFXgWDBagFywXyBSIGTgaEBr0G8wYnB1kHiQe0B9gH+QcVCC0IQAhMCE8I/QiiCC4I6QfxByMIewjWCPQIwQhjCOoHLgfBBmoGZAZHBt4FWAXUBF0E1wNWA/gCuQJ8AkwCTQK8AjoDXwNqA4kDtgPTA+0DEgQ+BHEEowTUBAsFPQVjBYgFrQXMBfMFKwZhBpUGywYBBzQHaAeYB8IH5wcKCCUIPAhQCFoIWQiiCEUIxwdpB3QHrgcCCE0IjQiACCcIvQcWB4wG+gXHBckFfAUBBYkECQSEAwoDpAJZAh0CEQJSAq0CCQMwA0wDgQOrA8cD5wMRBEcEeASjBOAEFQU6BWEFiQWtBdAF/gU5BnAGpAbbBhEHRQd5B6gH0Qf1BxcINQhOCF8IZAhdCEkI3gdZB+8G/wZAB4oH0wcpCEQI9Ad8B9cGNgafBUQFLQUGBaoENgSrAzMDvgJdAhMC7wE7Ap4CvQLgAhADPgNxA5oDuwPjAxgEUQR6BKYE4AQOBTgFYQWKBa0F0wUKBkcGfAa0Bu4GJgdaB40HugfhBwQIJQhFCFsIaghqCF4IDAiAB/cGjgaRBtkGNQdzB8EH9gfBB04HxwYZBnIF5gSKBHsEUATXA1QD1QJmAgsC1gH/AXsC9AIcAxwDMgNVA3kDmQO8A/EDKARUBHoEpQTaBAsFNwVhBYkFsAXfBRgGVQaRBswGBgc8B28HngfLB/AHEwg0CFEIaAhyCG8IXAjCB0cHqwY9BiwGcAbIBhIHZgegB3kHCgeGBuQFSQW+BCkE+gPhA3MD8AJ8AhMCxAHRAUkC1QI8A0oDNwNJA2QDeQOWA8QD/QMpBE8EdwSlBNsECQU1BV4FiwW9BfQFLgZrBqkG4wYbB1EHggevB9kH/wckCEUIXwhxCH4IdAhcCFYH8gZfBvEFzwUJBmQGwQYtBzwHDgexBiQGmAUTBYUE7QOKA10DCwOJAiICywGmAf8BkAIYA1wDOQMvA0QDWQNvA5UDxgP4AyEESQR0BKgE2wQIBTIFXwWVBcsFBQZDBoEGvgb2Bi4HYgeRB70H5wcQCDYIVwhxCIIIiAh3CFwI6AZ9BvgFpQV4BasFCgZrBtQGrwZ3BioGpwU+BcoERATRA2MD+wKoAjkC6gGfAZ0BLALOAkADPAMSAxwDMwNFA2YDkgPEA+0DFARBBHEEpgTaBAYFNAVkBZkF0wUUBlYGlgbSBgkHPgdwB5wHzAf4ByIIRwhnCIIIlAiMCHMIUQiFBiwGoQVMBSMFXwW4BRwGewYwBsEFegXuBMYEcgTxA4QDJQO/AmICCALDAXoBrAFjAvkCKAMBA+8CCAMbAzEDXQOQA7kD3wMJBDYEagSiBNcECwU9BW0FoQXjBSgGawaoBuMGGQdMB34HqwfbBwkIMwhYCHoIlAibCIkIaghFCBoGxgVOBf0E2gQbBXYF6gVFBv8FdQXhBF4EPAT5A4oDIAPLAncCLQLgAY8BWwHFAYwCBAPtAsYC0ALtAgYDLANcA4gDqgPTA/8DJgRZBJcE1gQYBVMFhgW9Bf0FPwZ9BrkG8QYnB1gHiQe5B+oHFwg/CGYIigifCJwIfwhiCDsIrwVdBfkEqASSBN0EOgWnBe0FnwUuBZ8E/wOyA2sDFAO7AmgCGALaAZkBTgFSAeoBmwLiArQCmwKyAtUC+gIoA1gDfAOgA80D9AMaBFYEoQTsBEEFhQWwBd0FFgZQBooGwwb6Bi8HYQeTB8gH9QceCEgIdQiWCKIIlQh2CFcILwhEBQAFqQRUBEwEoQT+BF0FkwVHBb0EOwTIA1ID7QKaAlACAQKxAXIBNAEWAX4BLQKdApoCdwJ/AqMCzQL2AiQDTwNwA5gDxQPsAxgEYQS0BAcFWAWXBcMF8AUjBlsGkwbKBv4GMwdoB50Hzgf6BycIVwiACJsImwiHCGgIRwgfCM8ElgRTBAQECQRlBL8EEAUmBdIEPAS9A2gD+wKWAj0C6QGbAU8BAgHqABgBhgENAlECSwJVAnMCnwLIAvICGwNBA2UDkwPCA+8DKAR9BNAEFQVXBZAFwAXwBSUGXAaUBswGAgc6B3EHpQfQB/4HNAhiCIQIlQiPCHQIUwg1CA0IbQQrBPMDtQPJAywEgwSzBJsERQS/AzsD5QKUAkUC9AGZAUcB7wDHABEBXQGOAc8BCAImAkoCcgKdAsYC7wITAzgDYQOTA8oD+QMzBIEEygQJBUcFfgWyBekFIQZaBpIGywYEBz4HdQelB9IHBQg5CGMIfwiGCHsIXwg/CCEI+wc=","lat":32.024,"lon":79.064,"desc":"Copernicus GLO-30 elevation (resampled to 30 m): a 1.9 km patch at 32.024°N, 79.064°E inside the box 31.87–32.35°N, 78.64–79.37°E. This is NOT Tso Kar (about 33.3°N, 78.0°E)"}};</script>
+<script src="https://cdn.jsdelivr.net/npm/geotiff@2.1.3/dist-browser/geotiff.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const G={Earth:9.81,Moon:1.62,Mars:3.71};
+const CRR=.02,V=.042,ETA=.85,PGEN=110,PHK=50,TMAX=150,SLIPMAX=.5,UA0=1.5,TMIN=233;
+const REG={
+ haughton:{n:"Haughton Crater, Devon Island (Earth)",body:"Earth",T:260,abs:.0007,de:.0007,st:"SCN",src:"Approximate natural background, scenario."},
+ ladakh:{n:"Ladakh box near 32.0°N 79.1°E (Earth, not Tso Kar)",body:"Earth",T:255,abs:.007,de:.007,st:"SCN",src:"Approximate high-altitude background, scenario."},
+ upload:{n:"Your uploaded terrain",body:"Earth",T:255,abs:.005,de:.005,st:"SCN",src:"Earth background scenario, not measured for your location."}};
+const BODYENV={Moon:{T:200,abs:.317,de:1.37,st:"PUB",src:"Chang’e-4 LND on the far side (not a polar value). Verify before use."},Mars:{T:210,abs:.21,de:.64,st:"PUB",src:"Curiosity RAD at Gale Crater. Verify before use."}};
+const SOIL={
+ loose:{n:"Loose sand-like",c:1040,phi:28,kc:990,kp:1528430,ex:1.1,K:.025},
+ very:{n:"Very loose",c:500,phi:25,kc:500,kp:8e5,ex:1,K:.03},
+ firm:{n:"Firm",c:15000,phi:35,kc:5000,kp:5e6,ex:.8,K:.01}};
+const SL=[["slope","Slope",0,35,1,8,"°","S"],["dist","Route length",10,1000,10,100,"m","S"],["days","Mission duration",1,1000,1,180,"days","S"],
+ ["D","Wheel diameter",.3,.9,.01,.526,"m","M"],["b","Wheel width",.2,.7,.01,.4,"m","M"],["sh","Added shielding mass",0,300,5,0,"kg","M"],["batt","Battery capacity",1000,5000,100,2000,"Wh","M"],["ins","Insulation factor",.5,3,.1,1,"×","M"],
+ ["mu","Attenuation coefficient",0,.1,.005,.02,"cm²/g","R"],
+ ["nr","Scattered rocks",0,200,5,40,"per ha","H"],["nf","Boulder fields",0,6,1,3,"","H"],["nc","Craters",0,10,1,5,"","H"],["sd","Feature seed",1,99,1,7,"","H"]];
+for(const g of["S","M","R","H"])$("g"+g).innerHTML=SL.filter(x=>x[7]==g).map(x=>`<label>${x[1]} <b id="v${x[0]}"></b> ${x[6]}<input type="range" id="${x[0]}" min="${x[2]}" max="${x[3]}" step="${x[4]}" value="${x[5]}"></label>`).join("");
+$("reg").innerHTML=Object.entries(REG).map(([k,r])=>`<option value="${k}">${r.n}</option>`).join("");
+$("soil").innerHTML=Object.entries(SOIL).map(([k,s])=>`<option value="${k}">${s.n}</option>`).join("");
+const rad=d=>d*Math.PI/180, fm=(x,d=1)=>x==null||!isFinite(x)?"n/a":(+x).toFixed(d);
+function sink(Nw,D,b,s){const r=D/2,cl=z=>Math.min(Math.max(z,5e-4),.6*r);let z=.01;
+ for(let i=0;i<60;i++){z=cl(z);const l=r*Math.acos(1-z/r);z=.5*z+.5*Math.pow(Nw/(b*l)/(s.kc/b+s.kp),1/s.ex)}
+ z=cl(z);return{z,l:r*Math.acos(1-z/r)}}
+function slipFor(q,l,K){const fr=i=>{const x=i*l/K;return 1-(1-Math.exp(-x))/x};
+ if(q<=0)return 0;if(q>=fr(.95))return null;let lo=1e-5,hi=.95;
+ for(let i=0;i<40;i++){const m=(lo+hi)/2;fr(m)<q?lo=m:hi=m}return(lo+hi)/2}
+function ev(R,env,s,th){
+ const g=G[env.body],t=rad(th),W=R.m*g,N=W*Math.cos(t),{z,l}=sink(N/6,R.D,R.b,s);
+ const Fs=W*Math.sin(t),Rc=6*R.b*(s.kc/R.b+s.kp)*Math.pow(z,s.ex+1)/(s.ex+1),F=Fs+CRR*N+Rc;
+ const Fmax=6*R.b*l*s.c+N*Math.tan(rad(s.phi)),q=Fmax/F,slip=slipFor(F/Fmax,l,s.K),tq=F*R.D/2/6,pm=F*V,pel=pm/ETA;
+ return{W,z,slip,tq,q,pm,pel,ok:slip!==null&&slip<=SLIPMAX&&tq<=TMAX}}
+function calc(R,env,s,th,d,days,mu){
+ const e=ev(R,env,s,th),v=e.slip==null?0:V*(1-e.slip),t=v>0?d/v:Infinity,net=v>0?(e.pel+PHK-PGEN)*t/3600:null,rem=net==null?null:Math.max(0,Math.min(R.batt,R.batt-net));
+ const T=env.T+(PHK+e.pel*(1-ETA))/(UA0/R.ins),f=R.sh?Math.exp(-mu*R.sh*.025):1;
+ let ms=0;for(let a=0;a<=45;a+=.5){if(ev(R,env,s,a).ok)ms=a;else break}
+ const why=!e.ok?(e.slip===null||e.slip>SLIPMAX?"wheel slip too high":"torque limit exceeded"):(R.batt-net<=0?"battery depleted":"");
+ return{...e,v,t,net,rem,T,Tm:T-TMIN,ab:env.abs*days*f,de:env.de*days*f,f,ms,why,route:e.ok&&!why}}
+const ROWS=[["m","Mass","kg",0,0,"PUB"],["D","Wheel diameter","m",3,0,"PUB"],["W","Rover weight at this site","N",0,0,"DER"],["z","Sinkage per wheel","mm",1,-1,"MOD"],["slip","Wheel slip","%",1,-1,"MOD"],["tq","Torque per wheel (equal load)","N·m",1,-1,"DER"],["q","Traction margin","×",2,1,"MOD"],["pm","Mechanical power","W",1,-1,"DER"],["pel","Electrical power","W",1,-1,"DER"],["net","Net battery drain on route","Wh",1,-1,"MOD"],["rem","Battery remaining","Wh",0,1,"MOD"],["ms","Steepest slope within limits","°",1,1,"MOD"],["T","Electronics temperature","K",0,0,"SCN"],["Tm","Margin above assumed minimum","K",1,1,"SCN"],["ab","Absorbed dose over mission","mGy",2,-1,"DER"],["de","Dose equivalent over mission","mSv",2,-1,"DER"]];
+const val=(R,c,k)=>k=="m"?R.m:k=="D"?R.D:k=="z"?c.z*1e3:k=="slip"?(c.slip==null?null:c.slip*100):c[k];
+let LAST;
+function run(){
+ for(const x of SL)$("v"+x[0]).textContent=$(x[0]).value;
+ const site=REG[$("reg").value],bd=$("bd").value,env=bd=="Earth"?site:{...site,...BODYENV[bd],body:bd,n:site.n+" with "+bd+" physics (what-if)"},s=SOIL[$("soil").value],n=id=>+$(id).value;
+ const B={m:1025,D:.526,b:.4,batt:2000,ins:1,sh:0},M={m:1025+n("sh"),D:n("D"),b:n("b"),batt:n("batt"),ins:n("ins"),sh:n("sh")};
+ const th=n("slope"),d=n("dist"),days=n("days"),mu=n("mu"),cB=calc(B,env,s,th,d,days,mu),cM=calc(M,env,s,th,d,days,mu);
+ LAST={B,M,env,s,th,d,days,mu,cB,cM};
+ $("env").innerHTML=[["Gravity",fm(G[env.body],2)+" m/s²","PUB"],["Ambient temperature",env.T+" K","SCN"],["Absorbed dose rate",env.abs+" mGy/day",env.st],["Dose equivalent rate",env.de+" mSv/day",env.st]].map(x=>`<div><small>${x[0]} <span class="c ${x[2]}">${x[2]}</span></small><strong>${x[1]}</strong></div>`).join("");
+ $("envn").textContent="Dose source: "+env.src+" Grays (absorbed) and sieverts (dose equivalent) are kept separate.";
+ $("tb").innerHTML="<tr><th>Metric</th><th>Reference</th><th>Modified</th><th>Change</th><th>Basis</th></tr>"+ROWS.map(r=>{
+  const a=val(B,cB,r[0]),b=val(M,cM,r[0]),dl=a!=null&&b!=null?b-a:null,cl=dl==null||Math.abs(dl)<1e-9||!r[4]?"n":(r[4]*dl>0?"ok":"bad");
+  return`<tr><td>${r[1]} <span class="n">${r[2]}</span></td><td>${a==null?"n/a":fm(a,r[3])}</td><td>${b==null?"n/a":fm(b,r[3])}</td><td class="${cl}">${dl==null?"":(dl>0?"+":"")+fm(dl,r[3])}</td><td><span class="c ${r[5]}">${r[5]}</span></td></tr>`}).join("");
+ const rt=(l,c)=>`${l}: ${c.route?"route completes within the limits":"route fails, "+c.why}.`;
+ $("route").textContent=rt("Reference",cB)+" "+rt("Modified",cM)+" Limits: slip up to 50% and "+TMAX+" N·m per wheel, both assumptions.";
+}
+function desc(e){return`slip ${e.slip==null?"above 95%":fm(e.slip*100,0)+"%"}, ${fm(e.tq,0)} N·m per wheel, sinkage ${fm(e.z*1e3,0)} mm, traction margin ${fm(e.q,2)}×`}
+function jarvis(q){
+ const L=LAST,s=q.toLowerCase(),m=s.match(/(\d+(?:\.\d+)?)\s*(?:°|deg)/),th=m?+m[1]:L.th,T=[],A=L.cB,Z=L.cM;let a;
+ if(/rock|crater|obstacle|boulder|hazard/.test(s)){T.push("evaluate_traversability");const X=window.HZ;
+  a=X?`The terrain view has ${X.rocks} rocks and ${X.craters} synthetic craters (random seeded scenario features, not measurements). Rocks taller than a rover’s wheel diameter count as hard obstacles: ${X.tall[0]} for the reference rover and ${X.tall[1]} for the modified one. Dense patches block ${X.blocked[0]} and ${X.blocked[1]} planning cells, and each route avoids them. Rock sizes follow an assumed power law and the one-wheel-diameter rule is a rule of thumb.`:"Switch the 3D view to real terrain to include rocks and craters."}
+ else if(/slope|climb|cross|steep|hill/.test(s)){T.push("evaluate_traversability","calculate_rover_physics");
+  const E=[L.B,L.M].map(R=>ev(R,L.env,L.s,th)),w=e=>e.ok?"inside":"outside";
+  a=`At ${th}° on ${L.env.body} with ${L.s.n.toLowerCase()} soil (scenario): the reference rover has ${desc(E[0])}, ${w(E[0])} the project limits. The modified rover has ${desc(E[1])}, ${w(E[1])} the limits. Steepest slope within limits is ${fm(A.ms)}° for the reference and ${fm(Z.ms)}° for the modified rover. Soil values, motor limit and rolling coefficient are assumptions, so use this to compare designs, not to predict a real drive.`}
+ else if(/radiat|dose|shield|cosmic/.test(s)){T.push("calculate_radiation_exposure");
+  a=`Over ${L.days} days at ${L.env.n}, the reference rover accumulates ${fm(A.ab,2)} mGy absorbed and ${fm(A.de,2)} mSv dose equivalent. With ${L.M.sh} kg added shielding the modified rover gets ${fm(Z.ab,2)} mGy, a change of ${fm((Z.f-1)*100,1)}%. Dose rate source: ${L.env.src} The shielding uses a simplified exponential model with an editable coefficient. It ignores secondary particles, and mass alone can help little against cosmic rays, so do not present it as validated.`}
+ else if(/energy|battery|power|drain/.test(s)){T.push("calculate_rover_physics");
+  a=`The ${L.d} m route takes ${fm(A.t/3600,2)} h (reference) and ${fm(Z.t/3600,2)} h (modified) after slip losses, at ${V} m/s wheel speed. Drive electrical power is ${fm(A.pel,0)} W for the reference and ${fm(Z.pel,0)} W for the modified rover. Counting ${PHK} W housekeeping and ${PGEN} W generation, net battery change is ${fm(A.net==null?null:-A.net,1)} Wh and ${fm(Z.net==null?null:-Z.net,1)} Wh, leaving ${fm(A.rem,0)} Wh and ${fm(Z.rem,0)} Wh. Housekeeping load and battery size are assumptions.`}
+ else if(/therm|temp|cold|heat/.test(s)){T.push("calculate_thermal");
+  a=`Steady-state electronics temperature is ${fm(A.T,0)} K for the reference and ${fm(Z.T,0)} K for the modified rover, margins of ${fm(A.Tm)} K and ${fm(Z.Tm)} K above the assumed 233 K minimum. This is a one-node scenario model that ignores atmospheric convection, so Earth and Moon differences are understated.`}
+ else if(/compar|better|improv|modif|worse|trade/.test(s)){T.push("compare_rover_configurations");
+  const up=[],dn=[];for(const r of ROWS){if(!r[4])continue;const x=val(L.B,A,r[0]),y=val(L.M,Z,r[0]);if(x==null||y==null||Math.abs(y-x)<1e-9)continue;(r[4]*(y-x)>0?up:dn).push(r[1].toLowerCase())}
+  a=`Same site, soil, slope and route for both rovers. Moved in the favourable direction: ${up.join(", ")||"nothing"}. Moved the other way: ${dn.join(", ")||"nothing"}. Reference route: ${A.route?"completes":"fails, "+A.why}. Modified route: ${Z.route?"completes":"fails, "+Z.why}. Whether this is a real improvement depends on the soil and limits you assumed, so rerun with other soils before concluding.`}
+ else if(/sink|slip|soil|wheel/.test(s)){T.push("calculate_rover_physics");
+  a=`On ${L.s.n.toLowerCase()} soil (scenario) at ${L.th}°: reference ${desc(A)}. Modified ${desc(Z)}. Sinkage uses the Bekker pressure-sinkage model and slip uses the Janosi-Hanamoto shear model. The soil numbers are not measured at ${L.env.n}.`}
+ else a="I can answer from the calculations on this page. Try: “Can it cross a 20 degree slope?”, “How much radiation over the mission?”, “How does the battery hold up?”, “What is the thermal margin?” or “Is my modified rover better?”";
+ return{a,T}}
+function ask(t){t=t.trim();if(!t)return;const c=$("chat"),u=document.createElement("div");u.className="u";u.textContent=t;c.append(u);
+ const r=jarvis(t),b=document.createElement("div");b.className="a";b.innerHTML=(r.T.length?`<small>tools called: ${r.T.join(", ")}</small>`:"")+r.a;c.append(b);c.scrollTop=c.scrollHeight;$("ask").value=""}
+$("go").onclick=()=>ask($("ask").value);$("ask").onkeydown=e=>{if(e.key=="Enter")ask(e.target.value)};
+$("qs").innerHTML=["Can it cross a 20 degree slope?","Radiation over the mission?","Battery and energy?","Is my modified rover better?"].map(x=>`<button class="q">${x}</button>`).join("");
+$("qs").onclick=e=>{if(e.target.classList.contains("q"))ask(e.target.textContent)};
+let sync3d=()=>{};
+if(window.THREE){(()=>{
+const cv=$("cv"),rd=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true}),sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(45,1,.1,500),sg=new THREE.Group();
+sc.add(new THREE.AmbientLight(0xffffff,.6));const sun=new THREE.DirectionalLight(0xffffff,.9);sun.position.set(-15,25,20);sc.add(sun,sg);
+const gnd=new THREE.Mesh(new THREE.PlaneGeometry(40,40).rotateX(-Math.PI/2),new THREE.MeshStandardMaterial({color:0x777777,roughness:1})),grid=new THREE.GridHelper(40,40,0x999999,0x555555);
+grid.position.y=.01;sg.add(gnd,grid);
+const M=c=>new THREE.MeshStandardMaterial({color:c,roughness:.7,metalness:.2});
+function build(R,col){const g=new THREE.Group(),r=R.D/2,sp=[],bx=(x,y,z,a,b,c,m)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(a,b,c),m);o.position.set(x,y,z);g.add(o)};
+ bx(0,r+.9,0,2.2,.6,1.2,M(col));bx(-1.35,r+.95,0,.5,.4,.4,M(0x555555));bx(.6,r+1.7,0,.08,.9,.08,M(0x888888));bx(.6,r+2.2,0,.25,.15,.35,M(0x333333));bx(0,r+.55,0,.1,.1,2.5,M(0x888888));
+ if(R.sh>0)bx(0,r+1.2+R.sh/14256,0,2,R.sh/7128,1.1,M(0x445566));
+ for(const s of[-1,1]){bx(0,r+.45,s*1.25,2.4,.08,.08,M(0x888888));
+  for(const x of[-1.1,0,1.1]){bx(x,r+.225,s*1.25,.06,.45,.06,M(0x888888));
+   const h=new THREE.Group();h.position.set(x,r,s*1.25);
+   h.add(new THREE.Mesh(new THREE.CylinderGeometry(r,r,R.b,24).rotateX(Math.PI/2),M(0x2a2d33)),new THREE.Mesh(new THREE.BoxGeometry(R.D*.98,.05,R.b*1.02),M(0xe8eaed)));
+   g.add(h);sp.push(h)}}
+ return{g,sp}}
+let R3=[],simT=0,play=true,last=0,tk=0,az=.55,el=.38,dist=26,dr=null;
+const VER=6,ROCKK=1,HZ=17.64;let TM=false,DM=null,H=null,SG=null,terr=null,pl=[],rk=[],rocks=[],prev=null,lastSig="",upd=null,upv=0,UP=null;const cache={};
+const dec=s=>{const b=atob(s.d),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return Float64Array.from(new Int16Array(u.buffer),v=>v*.1+s.h0)};
+const rng=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+function curDEM(){const k=$("reg").value;if(k=="upload")return upd;const s=window.SITES&&window.SITES[k];return s?(cache[k]||(cache[k]={...s,H:dec(s)})):null}
+function feats(){const n=DM.n,c=DM.cell,span=n*c,r=rng(+$("sd").value*7919),nc=+$("nc").value,nf=+$("nf").value,nr=+$("nr").value;H=Float64Array.from(DM.H);rocks=[];
+ for(let k=0;k<nc;k++){const lo=Math.max(12,2*c),D=lo+r()*(Math.max(60,6*c)-lo),R=D/2,cx=(r()-.5)*span*.76,cz=(r()-.5)*span*.76;
+  for(let i=0;i<n*n;i++){const q=Math.hypot((i%n-n/2+.5)*c-cx,((i/n|0)-n/2+.5)*c-cz);if(q<R)H[i]-=.2*D*(1-(q/R)**2);else if(q<1.6*R)H[i]+=.05*D*(1-(q-R)/(.6*R))**2}}
+ const add=(x,z)=>rocks.push({x,z,h:Math.min(2.5,.25/Math.sqrt(1-r())),a:r()*6.28});
+ for(let k=0,N=Math.round(nr*span*span/1e4);k<N;k++)add((r()-.5)*span,(r()-.5)*span);
+ for(let f=0;f<nf;f++){const cx=(r()-.5)*span*.7,cz=(r()-.5)*span*.7,sd=Math.max(15,1.5*c),N=Math.round(.6*2*Math.PI*sd*sd);
+  for(let k=0;k<N;k++){const g=()=>Math.sqrt(-2*Math.log(1-r()))*Math.cos(6.2832*r()),x=cx+g()*sd,z=cz+g()*sd;if(Math.abs(x)<span/2&&Math.abs(z)<span/2)add(x,z)}}}
+function dens(lim){const n=DM.n,c=DM.cell,a=new Float64Array(n*n);let t=0;for(const k of rocks)if(k.h>lim){const q=Math.floor(k.x/c+n/2),w=Math.floor(k.z/c+n/2);if(q>=0&&w>=0&&q<n&&w<n){a[w*n+q]+=1/(c*c);t++}}a.t=t;return a}
+function pair(){const n=DM.n,c=DM.cell,sl=(a,b)=>Math.atan(Math.abs(H[a]-H[b])/(c*Math.hypot(a%n-b%n,(a/n|0)-(b/n|0))))*180/Math.PI,nb=i=>{const r=i/n|0,q=i%n,o=[];for(let dr=-1;dr<=1;dr++)for(let dq=-1;dq<=1;dq++){const r2=r+dr,q2=q+dq;if((dr||dq)&&r2>=0&&q2>=0&&r2<n&&q2<n)o.push(r2*n+q2)}return o},cand=[];
+ for(let i=0;i<n*n;i++){const r=i/n|0,q=i%n;if(r>1&&q>1&&r<n-2&&q<n-2&&nb(i).every(j=>sl(i,j)<10))cand.push(i)}
+ let best=null;for(let k=0;k<cand.length;k+=Math.max(1,Math.floor(cand.length/25))){const s=cand[k],seen=new Set([s]),q=[s];for(let a=0;a<q.length;a++)for(const j of nb(q[a]))if(!seen.has(j)&&sl(q[a],j)<=12){seen.add(j);q.push(j)}
+  let g=s,gd=0;for(const j of q){const d=Math.hypot(j%n-s%n,(j/n|0)-(s/n|0));if(d>gd){gd=d;g=j}}if(!best||gd>best.d)best={s,g,d:gd}}
+ return best||{s:5*n+5,g:(n-6)*n+n-6}}
+const hAt=(px,pz)=>{const n=DM.n,c=DM.cell,u=px/c+n/2-.5,w=pz/c+n/2-.5,i=clamp(Math.floor(w),0,n-2),j=clamp(Math.floor(u),0,n-2),fu=u-j,fw=w-i,h=(a,b)=>H[a*n+b];
+ return(h(i,j)*(1-fu)+h(i,j+1)*fu)*(1-fw)+(h(i+1,j)*(1-fu)+h(i+1,j+1)*fu)*fw-DM.h0};
+function table(R,L){const t=[];for(let k=0;k<=90;k++){const e=ev(R,L.env,L.s,k/2),v=e.slip==null?0:V*(1-e.slip);t.push({ok:e.ok&&v>0,v,pel:e.pel,tq:e.tq,slip:e.slip,j:v>0?e.pel/v:0})}return t}
+const mu_=(rho,i)=>1+2*rho[i]*HZ;
+function plan(tb,rho){const n=DM.n,c=DM.cell,g=new Float64Array(n*n).fill(1e18),pr=new Int32Array(n*n).fill(-1),dn=new Uint8Array(n*n),s0=SG.s,s1=SG.g;
+ let jm=1e18;tb.forEach(x=>{if(x.ok)jm=Math.min(jm,x.j)});if(jm>=1e18)return null;
+ const open=new Set([s0]),hh=i=>Math.hypot(i%n-s1%n,(i/n|0)-(s1/n|0))*c*jm;g[s0]=0;
+ while(open.size){let b=-1,bf=1e19;for(const i of open){const f=g[i]+hh(i);if(f<bf){bf=f;b=i}}
+  if(b==s1)break;open.delete(b);dn[b]=1;const r=b/n|0,q=b%n;
+  for(let dr=-1;dr<=1;dr++)for(let dq=-1;dq<=1;dq++){const r2=r+dr,q2=q+dq;if((!dr&&!dq)||r2<0||q2<0||r2>=n||q2>=n)continue;const j=r2*n+q2;if(dn[j]||(j!=s1&&rho[j]*HZ>=1))continue;
+   const len=c*Math.hypot(dr,dq),x=tb[Math.min(90,Math.round(Math.atan(Math.abs(H[j]-H[b])/len)*360/Math.PI))];if(!x.ok)continue;
+   const gg=g[b]+len*x.j*(mu_(rho,b)+mu_(rho,j))/2;if(gg<g[j]){g[j]=gg;pr[j]=b;open.add(j)}}}
+ if(pr[s1]<0)return null;const p=[];for(let i=s1;i>=0;i=pr[i])p.push(i);return p.reverse()}
+function drive(tb,p,rho){const n=DM.n,c=DM.cell,ps=i=>[(i%n-n/2+.5)*c,((i/n|0)-n/2+.5)*c],q0=ps(p[0]),o=[{px:q0[0],pz:q0[1],d:0,t:0,e:0,sl:0,pit:0,w:tb[0]}];let d=0,t=0,e=0,mx=0;
+ for(let k=1;k<p.length;k++){const a=p[k-1],b=p[k],len=c*Math.hypot(b%n-a%n,(b/n|0)-(a/n|0)),sl=Math.atan(Math.abs(H[b]-H[a])/len)*180/Math.PI,w=tb[Math.min(90,Math.round(sl*2))],m=(mu_(rho,a)+mu_(rho,b))/2,dt=len*m/w.v,q=ps(b);
+  d+=len*m;t+=dt;e+=(w.pel+PHK-PGEN)*dt/3600;mx=Math.max(mx,sl);o.push({px:q[0],pz:q[1],d,t,e,sl,pit:Math.atan((H[b]-H[a])/len),w})}
+ o.mx=mx;return o}
+function mkTerr(){if(terr){sg.remove(terr);terr.geometry.dispose()}const n=DM.n,c=DM.cell,gm=new THREE.PlaneGeometry(n*c,n*c,n-1,n-1).rotateX(-Math.PI/2),P=gm.attributes.position,col=new Float32Array(n*n*3),h=(a,b)=>H[clamp(a,0,n-1)*n+clamp(b,0,n-1)];
+ for(let i=0;i<n*n;i++){const r=i/n|0,q=i%n,sl=Math.atan(Math.hypot((h(r,q+1)-h(r,q-1))/(2*c),(h(r+1,q)-h(r-1,q))/(2*c)))*180/Math.PI,k=Math.min(1,sl/30);
+  P.setY(i,H[i]-DM.h0);col.set([.35+.55*k,.55-.25*k,.35-.2*k],i*3)}
+ gm.setAttribute("color",new THREE.BufferAttribute(col,3));gm.computeVertexNormals();terr=new THREE.Mesh(gm,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1}));sg.add(terr)}
+function mkRocks(lim){rk.forEach(m=>{sg.remove(m);m.dispose&&m.dispose()});rk=[];if(!rocks.length)return;const g=new THREE.IcosahedronGeometry(1,0),m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),pS=new THREE.Vector3(),sS=new THREE.Vector3(),cls=[[],[]];
+ for(const k of rocks)cls[k.h>lim?1:0].push(k);
+ cls.forEach((a,ci)=>{if(!a.length)return;const im=new THREE.InstancedMesh(g,new THREE.MeshStandardMaterial({color:ci?0xff8a3c:0x8c8c8c,roughness:1}),a.length);
+  a.forEach((k,i)=>{const s=k.h*VER;pS.set(k.x,hAt(k.x,k.z)+.25*s,k.z);sS.set(s*.9,s*.6,s*.8);q.setFromEuler(e.set(0,k.a,0));m4.compose(pS,q,sS);im.setMatrixAt(i,m4)});sg.add(im);rk.push(im)})}
+function at(o){const D=o.dr;let k=1;while(k<D.length-1&&D[k].t<simT)k++;const a=D[k-1],b=D[k],f=b.t>a.t?clamp((simT-a.t)/(b.t-a.t),0,1):1;
+ return{px:a.px+(b.px-a.px)*f,pz:a.pz+(b.pz-a.pz)*f,d:a.d+(b.d-a.d)*f,e:a.e+(b.e-a.e)*f,sl:b.sl,w:b.w,pit:b.pit,yaw:Math.atan2(b.pz-a.pz,b.px-a.px),done:simT>=D[D.length-1].t}}
+function place(o){const D=o.dr;o.g.visible=!!D;if(!D)return;const s=at(o);o.g.position.set(s.px,hAt(s.px,s.pz),s.pz);o.g.rotation.y=-s.yaw;o.g.rotation.z=s.pit;
+ const a=V*Math.min(simT,D[D.length-1].t)/(o.R.D/2);o.sp.forEach(w=>w.rotation.z=-a)}
+function tnr(o){if(!o.dr)return["no route","n/a","n/a","n/a","n/a","no route within limits"];const s=at(o);
+ return[fm(s.d,0),fm(s.sl,1),s.w.slip==null?"n/a":fm(s.w.slip*100,0),fm(s.w.tq,0),fm(clamp(o.R.batt-s.e,0,o.R.batt),0),s.done?"arrived":"driving"]}
+async function upRead(){const f=$("up").files[0],us=$("us");if(!f)return;us.textContent="Reading the file header...";
+ try{if(!window.GeoTIFF)throw Error("the geotiff library did not load");const t=await GeoTIFF.fromBlob(f),im=await t.getImage(),W=im.getWidth(),Hh=im.getHeight(),res=im.getResolution(),o=im.getOrigin(),gk=im.getGeoKeys()||{},
+   geo=gk.GTModelTypeGeoKey?gk.GTModelTypeGeoKey==2:Math.abs(res[0])<.5,R={Earth:6371008.8,Moon:1737400,Mars:3389500}[$("ub").value],lat=o[1]+res[1]*Hh/2;
+  UP={im,W,Hh,nd:im.getGDALNoData(),name:f.name};
+  $("ux").value=(geo?Math.abs(res[0])*Math.PI/180*R*Math.cos(lat*Math.PI/180):Math.abs(res[0])).toFixed(2);$("uy").value=(geo?Math.abs(res[1])*Math.PI/180*R:Math.abs(res[1])).toFixed(2);
+  $("uw").value=Math.round(64*Math.max(10,+$("ux").value,+$("uy").value));us.textContent=f.name+": "+W+" x "+Hh+" cells, "+(geo?"latitude/longitude":"projected")+" grid. Check the cell sizes (metres on the ground), then press Build.";await upBuild()}
+ catch(e){us.textContent="Could not read this file: "+e.message}}
+async function upBuild(){if(!UP)return;const us=$("us"),{im,W,Hh,nd}=UP,n=64,s=+$("uw").value/n,dx=+$("ux").value,dy=+$("uy").value,se=+$("ue").value,sn=+$("un").value,k=Math.max(1,Math.min(8,Math.round(s/Math.min(dx,dy))));
+ try{if(!(s>0&&dx>0&&dy>0))throw Error("cell sizes and patch width must be positive numbers");us.textContent="Reading the elevation window...";
+  const cx=Math.round(W/2+se/dx),cy=Math.round(Hh/2-sn/dy),hx=Math.ceil(32*s/dx)+3,hy=Math.ceil(32*s/dy)+3,x0=Math.max(0,cx-hx),y0=Math.max(0,cy-hy),x1=Math.min(W,cx+hx),y1=Math.min(Hh,cy+hy);
+  if(x1-x0<8||y1-y0<8)throw Error("the shifted patch lies outside the file");
+  const a=(await im.readRasters({window:[x0,y0,x1,y1],samples:[0]}))[0],ww=x1-x0,wh=y1-y0,bad=v=>!isFinite(v)||v===nd||v<-9000;
+  const g=(c,r)=>{const j=Math.floor(c),i=Math.floor(r);if(j<0||i<0||j+1>=ww||i+1>=wh)return NaN;const p=[a[i*ww+j],a[i*ww+j+1],a[(i+1)*ww+j],a[(i+1)*ww+j+1]];if(p.some(bad))return NaN;const u=c-j,v=r-i;return(p[0]*(1-u)+p[1]*u)*(1-v)+(p[2]*(1-u)+p[3]*u)*v};
+  const Hn=new Float64Array(n*n).fill(NaN);let nbad=0,sum=0,cnt=0;
+  for(let i=0;i<n;i++)for(let j=0;j<n;j++){let t=0,m=0;for(let u=0;u<k;u++)for(let v=0;v<k;v++){const e=(j-31.5+(u+.5)/k-.5)*s,no=(31.5-i-((v+.5)/k-.5))*s,q=g(cx-x0+e/dx,cy-y0-no/dy);if(isFinite(q)){t+=q;m++}}
+   if(m){Hn[i*n+j]=t/m;sum+=t/m;cnt++}else nbad++}
+  if(nbad>.1*n*n)throw Error(Math.round(100*nbad/n/n)+"% of the patch has no data; move it with the shift boxes");
+  for(let i=0;i<n*n;i++)if(!isFinite(Hn[i]))Hn[i]=sum/cnt;
+  let lo=1e18,hi=-1e18;for(const v of Hn){lo=Math.min(lo,v);hi=Math.max(hi,v)}
+  upd={n,cell:s,H:Hn,h0:lo,rel:hi-lo,desc:"your file "+UP.name+": a "+Math.round(s*n)+" m patch, resampled to "+n+" x "+n+" cells of "+s.toFixed(1)+" m from "+dx+" x "+dy+" m cells"+(nbad?"; "+nbad+" cells with no data were filled with the patch mean":"")};
+  upv++;$("reg").value="upload";us.textContent="Built: "+upd.desc+".";run()}
+ catch(e){us.textContent="Could not build the terrain: "+e.message}}
+$("up").onchange=upRead;$("ug").onclick=upBuild;
+sync3d=()=>{const L=LAST;R3.forEach(o=>{sg.remove(o.g);o.g.traverse(m=>{if(m.geometry)m.geometry.dispose()})});
+ DM=curDEM();TM=!!DM&&$("tm").value=="dem";pl.forEach(l=>{sg.remove(l);l.geometry.dispose()});pl=[];gnd.visible=grid.visible=!TM;let fresh=prev!==TM;
+ if(TM){const sig=[$("reg").value,upv,$("nr").value,$("nf").value,$("nc").value,$("sd").value].join();if(sig!==lastSig){lastSig=sig;feats();SG=pair();mkTerr();fresh=true}}
+ if(terr)terr.visible=TM;rk.forEach(m=>m.visible=TM);if(fresh){dist=TM?DM.n*DM.cell*.8:26;prev=TM}
+ R3=[[L.B,L.cB,0x9aa3ad,-2.6],[L.M,L.cM,0xff9a3c,2.6]].map(([R,c,col,zz])=>{const o=build(R,col);o.R=R;o.c=c;sg.add(o.g);
+  if(TM){o.g.scale.setScalar(VER);o.g.rotation.order="YZX";o.lim=ROCKK*R.D;o.rho=dens(o.lim);o.tb=table(R,L);const p=plan(o.tb,o.rho);o.dr=p&&drive(o.tb,p,o.rho);
+   if(o.dr)pl.push(new THREE.Line(new THREE.BufferGeometry().setFromPoints(p.map(i=>new THREE.Vector3((i%DM.n-DM.n/2+.5)*DM.cell,H[i]-DM.h0+2*VER,((i/DM.n|0)-DM.n/2+.5)*DM.cell))),new THREE.LineBasicMaterial({color:col})))}
+  else o.g.position.z=zz;return o});pl.forEach(l=>sg.add(l));
+ if(TM){mkRocks(Math.min(R3[0].lim,R3[1].lim));window.HZ={rocks:rocks.length,craters:+$("nc").value,tall:R3.map(o=>o.rho.t),blocked:R3.map(o=>o.rho.reduce((s,v)=>s+(v*HZ>=1?1:0),0))}}else window.HZ=null;
+ $("ts").textContent=TM?"Terrain: real elevation from "+DM.desc+". Heights are above each dataset\u2019s own reference surface. Rovers and rocks are drawn "+VER+"\u00d7 larger for visibility. Grey rocks can be crossed by both rovers; orange rocks are taller than a wheel diameter for at least one. Craters, rocks and boulder fields are random seeded scenario features, not measurements. Each rover plans its own least-energy route within its own slope limit, avoiding planning cells where tall rocks are too dense, and its odometer includes an allowance for detours. Slope uses magnitude only, so side slopes are not modelled. "+R3.map((o,i)=>(i?"Modified: ":"Reference: ")+(o.dr?"odometer "+fm(o.dr[o.dr.length-1].d,0)+" m, steepest step "+fm(o.dr.mx,1)+"\u00b0, "+fm(o.dr[o.dr.length-1].t/3600,1)+" h, net battery change "+fm(-o.dr[o.dr.length-1].e,1)+" Wh, "+o.rho.t+" obstacle rocks":"no route within its slope limit")).join(". ")+".":($("reg").value=="upload"&&!upd?"Choose a GeoTIFF under Upload your own terrain to use this option.":"");
+ sg.rotation.z=TM?0:rad(L.th);gnd.material.color.set({Moon:0x77746f,Mars:0x8a5a40,Earth:0x6e6c58}[L.env.body]);simT=0};
+const clamp=(x,a,b)=>Math.min(b,Math.max(a,x)),hms=s=>new Date(s*1e3).toISOString().substr(11,8);
+function tel(){const L=LAST,f=o=>{if(TM)return tnr(o);const c=o.c,tt=c.v>0?Math.min(simT,L.d/c.v):simT,used=(c.pel+PHK-PGEN)*tt/3600;
+ return[fm(Math.min(L.d,c.v*simT),1),fm(V/(o.R.D/2)*30/Math.PI,2),c.slip==null?"n/a":fm(c.slip*100,0),fm(c.tq,0),fm(clamp(o.R.batt-used,0,o.R.batt),0),c.route?"within limits":"outside limits: "+c.why]},a=f(R3[0]),b=f(R3[1]);
+ $("tt").innerHTML="<tr><th>At "+hms(simT)+" simulated</th><th>Reference</th><th>Modified</th></tr>"+["Distance travelled (m)",(TM?"Local slope (°)":"Wheel speed (rpm)"),"Wheel slip (%)","Torque per wheel (N·m)","Battery (Wh)","Status"].map((n,i)=>`<tr><td>${n}</td><td>${a[i]}</td><td>${b[i]}</td></tr>`).join("")}
+function frame(ts){requestAnimationFrame(frame);if(!R3.length)return;const dt=Math.min((ts-last)/1e3,.1);last=ts;if(play)simT+=dt*+$("sp").value;
+ const w=cv.clientWidth,h=cv.clientHeight;if(cv.width!=w||cv.height!=h){rd.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+ for(const o of R3){if(TM){place(o);continue}const c=o.c,tt=c.v>0?Math.min(simT,LAST.d/c.v):simT;o.g.position.x=-12+24*Math.min(1,c.v*simT/LAST.d);o.g.position.y=-c.z;o.sp.forEach(s=>s.rotation.z=-V*tt/(o.R.D/2))}
+ const ty=TM?DM.rel/2:2;cam.position.set(dist*Math.cos(el)*Math.sin(az),dist*Math.sin(el)+ty,dist*Math.cos(el)*Math.cos(az));cam.lookAt(0,ty,0);rd.render(sc,cam);
+ if(ts-tk>120){tk=ts;tel()}}
+cv.onpointerdown=e=>{dr=[e.clientX,e.clientY];cv.setPointerCapture(e.pointerId)};
+cv.onpointermove=e=>{if(!dr)return;az-=(e.clientX-dr[0])*.008;el=clamp(el+(e.clientY-dr[1])*.006,.05,1.4);dr=[e.clientX,e.clientY]};
+cv.onpointerup=()=>dr=null;
+cv.onwheel=e=>{e.preventDefault();dist=clamp(dist*(1+Math.sign(e.deltaY)*.08),6,TM?DM.n*DM.cell*3:60)};
+$("pl").onclick=()=>{play=!play;$("pl").textContent=play?"Pause":"Play"};$("rs").onclick=()=>{simT=0};
+requestAnimationFrame(frame);
+})()}else $("cv").outerHTML="<p class=\"note\">The 3D view needs the three.js library, which did not load. The numbers above still work.</p>";
+const _r=run;run=function(e){if(e&&e.target&&/^(sp|ask|u[a-z])$/.test(e.target.id))return;_r();sync3d()};
+document.addEventListener("input",run);run();
+</script></body></html>
